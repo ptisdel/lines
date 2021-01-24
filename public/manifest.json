@@ -1,0 +1,17 @@
+{
+  "short_name": "Lines",
+  "name": "Lines: A line-based note-taking webapp",
+  "description": "Lines: A line-based note-taking webapp",
+  "icons": {
+    "128": "icon128.png"
+  },
+  "manifest_version": 2,
+  "version": "0.8",
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_title": "Open the popup"
+  },
+  "permissions": [
+    "storage"
+  ]
+}
