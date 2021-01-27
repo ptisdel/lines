@@ -4,6 +4,9 @@ import { v4 } from 'uuid';
 import { matchesFilterTag } from './helpers';
 import * as constants from './constants';
 
+// used to identify what changes to storage originate here
+const instanceId = v4();
+
 const defaultNotes = {
   0: {
     tags: [],
@@ -22,7 +25,7 @@ const saveData = notes => {
   const notesData = JSON.stringify(notes);
   if (constants.CHROME_EXTENSION_MODE) {
     // eslint-disable-next-line no-undef
-    chrome.storage.sync.set({ notesData }, () => {});
+    chrome.storage.sync.set({ instanceId, notesData }, () => {});
     return;
   }
   
@@ -63,6 +66,20 @@ export const useApp = () => {
     }
 
     loadData(callback);
+
+    if (!constants.CHROME_EXTENSION_MODE) return;
+
+    // if there are changes, and those changes include notesData, load notesData
+    const listenForChanges = changes => {
+      const saverInstanceId = changes?.instanceId;
+      const newNotesData = changes?.notesData?.newValue;
+      if (saverInstanceId === instanceId && newNotesData) callback(newNotesData)
+    };
+    
+    /* eslint-disable no-undef */
+    chrome.storage.onChanged.addListener(listenForChanges);
+    return () => chrome.storage.onChanged.removeListener(listenForChanges);
+    /* eslint-enable no-undef */
   }, []);
 
   // save data
