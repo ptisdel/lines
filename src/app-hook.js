@@ -45,8 +45,8 @@ export const useApp = () => {
 
   // initial state
     
-  const [notes, setNotes] = useState(defaultNotes);
-  const [currentNoteIndex, setCurrentNoteIndex] = useState('0');
+  const [notes, setNotes] = useState(null);
+  const [currentNoteIndex, setCurrentNoteIndex] = useState(null);
   const [filterTag, setFilterTag] = useState(null);
 
   // load data
@@ -54,11 +54,11 @@ export const useApp = () => {
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const callback = notesData => {
-      const notes = JSON.parse(notesData);
-      const noteIndices = _.keys(notes);
+      const notesDataParsed = JSON.parse(notesData);
+      const noteIndices = _.keys(notesDataParsed);
       const firstNoteIndex = _.head(noteIndices);
       setCurrentNoteIndex(firstNoteIndex);
-      setNotes(notes);
+      setNotes(notesDataParsed);
       setIsLoading(false);
     }
 
@@ -68,15 +68,15 @@ export const useApp = () => {
   // save data
 
   useEffect(() => {
-    saveData(notes);
-  }, [notes]);
+    if (!isLoading) saveData(notes);
+  }, [isLoading, notes]);
 
   // get all lines
 
   const currentNote = _.get(notes, currentNoteIndex);
-  const allLineData = currentNote.lines;
+  const allLineData = currentNote?.lines;
   const allLines = _.map(allLineData, lineData => lineData.text);
-  const allTags = currentNote.tags;
+  const allTags = currentNote?.tags;
 
   // get unfiltered lines
 
@@ -114,7 +114,7 @@ export const useApp = () => {
     // get entire note's data
     const newLines = _.map(newLineData, lineData => lineData.text);
     const newLinesAsText = _.join(newLines, '\n');
-    const tags = newLinesAsText.match(/(#+[a-zA-Z0-9(_)]{1,})/g); // collect hashtags
+    const tags = newLinesAsText?.match(/(#+[a-zA-Z0-9(_)]{1,})/g); // collect hashtags
     const dedupedTags = _.uniq(tags);
     const sortedTags = _.sortBy(dedupedTags);
 
@@ -239,7 +239,7 @@ export const useApp = () => {
       allTags,
       currentNote: {
         index: currentNoteIndex,
-        label: currentNote.label,
+        label: currentNote?.label,
       },
       filterTag,
       isLoading,
