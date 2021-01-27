@@ -1,7 +1,7 @@
 {
   "short_name": "Lines",
-  "name": "Lines: A line-based note-taking webapp",
-  "description": "Lines: A line-based note-taking webapp",
+  "name": "Lines for Chrome",
+  "description": "Manage your to-do lists with Lines for Chrome",
   "icons": {
     "128": "icon128.png"
   },
