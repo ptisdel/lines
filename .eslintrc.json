@@ -12,6 +12,9 @@
     "sourceType": "module"
   },
   "rules": {
+    "arrow-parens": "off",
+    "consistent-return": "off",
+    "import/prefer-default-export": "off",
     "no-const-assign": "warn",
     "no-this-before-super": "warn",
     "no-undef": "warn",
@@ -19,15 +22,14 @@
     "no-unreachable": "warn",
     "no-unused-vars": "warn",
     "constructor-super": "warn",
+    "jsx-a11y/no-autofocus": "off",
+    "react/jsx-filename-extension": "off",
     "valid-typeof": "warn",
     "quotes": [
       2,
       "single"
     ],
-    "semi": [
-      "error",
-      "never"
-    ]
+    "semi": "off"
   },
   "parser": "babel-eslint",
   "extends": "airbnb",

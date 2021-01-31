@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 
 export const matchesFilterTag = (line, filterTag) => (
   _.includes(line.tags, filterTag)
-  || line.tempTag === filterTag 
+  || line.tempTag === filterTag
 );
 
 export const useInterval = (callback, delay) => {

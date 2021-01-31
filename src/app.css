@@ -1,3 +1,7 @@
+* { 
+  font-family: Consolas;
+}
+
 html, body {
   margin: 0;
 }
@@ -10,7 +14,6 @@ html {
 }
 
 body, #root, #app {
-  font-family: Consolas;
   height: 100%;
   width: 100%;
 }
@@ -23,7 +26,7 @@ body, #root, #app {
 }
 
 #spinner {
-  background-image: url('./spinner.png');
+  background-image: url('./images/spinner.png');
   width: 100px;
   height: 91px;
   animation-name: spin;
@@ -80,9 +83,14 @@ body, #root, #app {
 }
 
 .option {
+  background: none;
+  border: none;
   color: #03423d;
   cursor: pointer;
+  font-size: 16px;
   margin-bottom: 4px;
+  outline: none;
+  padding: 0;
   position: relative;
   user-select: none;
 }
@@ -91,7 +99,7 @@ body, #root, #app {
   position: absolute;
   right: 100%;
   padding-right: 5px;
-  top: 3.5px;
+  top: 3px;
   content: '*';
 }
 
@@ -102,9 +110,12 @@ body, #root, #app {
 }
 
 .edit-button {
-  font-size: 20px;
+  background: none;
+  border: none;
   color: #03423d;
   cursor: pointer;
+  font-size: 20px;
+  outline: none;
   user-select: none;
 }
 
@@ -128,13 +139,15 @@ body, #root, #app {
 
 .available-tag {
   background-color: #eceaea;
+  border: 0;
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
+  margin-bottom: 20px;
   margin-right: 10px;
+  outline: none;
   padding: 5px 7px;
   user-select: none;
-  margin-bottom: 20px;
 }
 
 .available-tag:hover {
@@ -223,7 +236,6 @@ body, #root, #app {
   outline: 0;
   border-bottom: 2px solid lightgray;
   margin-right: 20px;
-  font-family: Consolas;
   flex: 1;
 }
 
@@ -232,7 +244,6 @@ body, #root, #app {
   border: 0;
   background: #139e92;
   color: white;
-  font-family: Consolas;
   padding: 5px 8px;
   margin-right: 10px;
   cursor: pointer;
@@ -243,7 +254,6 @@ body, #root, #app {
   border: 0;
   background: #969696;
   color: white;
-  font-family: Consolas;
   padding: 5px 8px;
   cursor: pointer;
 }

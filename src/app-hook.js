@@ -1,8 +1,24 @@
 import _ from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
-import { matchesFilterTag, useInterval } from './helpers';
-import * as constants from './constants';
+import * as helpers from './helpers';
+
+const {
+  isElectronModeEnabled,
+} = helpers.electron;
+
+const {
+  isChromeModeEnabled,
+  listenToChromeStorageChanges,
+  loadChromeStorageData,
+  saveChromeStorageData,
+} = helpers.chromeExtension;
+
+const {
+  isWebappModeEnabled,
+  loadLocalStorageData,
+  saveLocalStorageData,
+} = helpers.webapp;
 
 // used to identify what changes to storage originate here
 const instanceId = v4();
@@ -30,33 +46,18 @@ const saveData = notes => {
     notes,
     lastUpdaterId: instanceId,
   });
-  if (constants.CHROME_EXTENSION_MODE) {
-    // eslint-disable-next-line no-undef
-    chrome.storage.sync.set({ data }, () => {});
-    console.log('saving');
-    return;
-  }
-  
-  window.localStorage.setItem('data', data);
+  if (isChromeModeEnabled) saveChromeStorageData({ data });
+  if (isWebappModeEnabled || isElectronModeEnabled) saveLocalStorageData({ data });
 }
 
 const loadData = callback => {
-  if (constants.CHROME_EXTENSION_MODE) {
-    // eslint-disable-next-line no-undef
-    chrome.storage.sync.get({ data: defaultData }, result => {
-      const parsedData = JSON.parse(result.data);
-      callback(parsedData.notes);
-    });
-    return;
-  }
-
-  callback(window.localStorage.getItem('data'));
+  if (isChromeModeEnabled) loadChromeStorageData({ callback, defaultData });
+  if (isWebappModeEnabled || isElectronModeEnabled) loadLocalStorageData({ callback, defaultData });
 }
 
-export const useApp = () => {
-
+const useApp = () => {
   // initial state
-    
+
   const [notes, setNotes] = useState(null);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(null);
   const [filterTag, setFilterTag] = useState(null);
@@ -65,54 +66,48 @@ export const useApp = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    const callback = notes => {
-      setNotes(notes);
+    const callback = callbackData => {
+      const callbackNotes = callbackData?.notes;
+      setNotes(callbackNotes);
       setIsLoading(false);
     }
 
-    // load initialize 
+    // load initial data
     loadData(callback);
 
-    if (!constants.CHROME_EXTENSION_MODE) return;
-
-    // if there are changes, and those changes include notesData, load notesData
-    const listenForChanges = changes => {
-      const parsedData = JSON.parse(changes?.data.newValue);
-      const latestUpdaterId = parsedData.lastUpdaterId;
-      const newNotes = parsedData.notes;
-      if (latestUpdaterId !== instanceId && newNotes) callback(newNotes)
-    };
-    
-    /* eslint-disable no-undef */
-    chrome.storage.onChanged.addListener(listenForChanges);
-    return () => chrome.storage.onChanged.removeListener(listenForChanges);
-    /* eslint-enable no-undef */
+    // subscribe to future data updates
+    if (isChromeModeEnabled) return listenToChromeStorageChanges();
   }, []);
 
   // select first available note
+
   useEffect(() => {
     if (notes === null) return;
     const noteIndices = _.keys(notes);
     const firstNoteIndex = _.head(noteIndices);
     if (currentNoteIndex === null) setCurrentNoteIndex(firstNoteIndex);
   }, [currentNoteIndex, notes]);
-  
+
   // get all lines
 
   const currentNote = _.get(notes, currentNoteIndex);
   const allLineData = currentNote?.lines;
-  const allLines = _.map(allLineData, lineData => lineData.text);
+  const allLines = _.map(allLineData, (lineData) => lineData.text);
   const allTags = currentNote?.tags;
 
   // get unfiltered lines
 
-  const unfilteredLineData = filterTag ? _.filter(allLineData, line => matchesFilterTag(line, filterTag)) : [];
-  const unfilteredLines = _.map(unfilteredLineData, lineData => lineData.text);
+  const unfilteredLineData = filterTag
+    ? _.filter(allLineData, (line) => helpers.shared.matchesFilterTag(line, filterTag))
+    : [];
+  const unfilteredLines = _.map(unfilteredLineData, (lineData) => lineData.text);
 
-  // get filtered lines 
+  // get filtered lines
 
-  const filteredLineData = filterTag ? _.filter(allLineData, line => !matchesFilterTag(line, filterTag)) : [];
-  
+  const filteredLineData = filterTag
+    ? _.filter(allLineData, (line) => !helpers.shared.matchesFilterTag(line, filterTag))
+    : [];
+
   // get visible text
 
   const visibleText = _.join(filterTag ? unfilteredLines : allLines, '\n');
@@ -120,7 +115,7 @@ export const useApp = () => {
   // editing a note starts a countdown to autosave
 
   const [saveCountdown, setSaveCountdown] = useState(null);
-  useInterval(() => {
+  helpers.shared.useInterval(() => {
     if (_.isNull(saveCountdown)) return;
 
     setSaveCountdown(saveCountdown - 1);
@@ -131,13 +126,13 @@ export const useApp = () => {
     }
   }, _.isNull(saveCountdown) ? null : 1000);
 
-  const editNote = text => {
+  const editNote = (text) => {
     const updatedLines = text?.split('\n');
 
-    const updatedLineData = _.map(updatedLines, line => {
+    const updatedLineData = _.map(updatedLines, (line) => {
       const tags = line.match(/(#+[a-zA-Z0-9(_)]{1,})/g);
       const dedupedTags = _.uniq(tags);
-    
+
       return {
         text: line,
         tags: dedupedTags,
@@ -150,9 +145,9 @@ export const useApp = () => {
       ...updatedLineData,
       ...filteredLineData,
     ];
-    
+
     // get entire note's data
-    const newLines = _.map(newLineData, lineData => lineData.text);
+    const newLines = _.map(newLineData, (lineData) => lineData.text);
     const newLinesAsText = _.join(newLines, '\n');
     const tags = newLinesAsText?.match(/(#+[a-zA-Z0-9(_)]{1,})/g); // collect hashtags
     const dedupedTags = _.uniq(tags);
@@ -175,16 +170,14 @@ export const useApp = () => {
     setSaveCountdown(3);
   };
 
-  useEffect(() => {
-    return () => {
-      if (!isLoading) saveData(notes);
-    };
+  useEffect(() => () => {
+    if (!isLoading) saveData(notes);
   }, [isLoading, notes]);
 
   // filter notes by tags
 
   const clearTempTags = () => {
-    const newLines = _.map(allLineData, line => ({
+    const newLines = _.map(allLineData, (line) => ({
       ...line,
       tempTag: null,
     }));
@@ -202,7 +195,7 @@ export const useApp = () => {
     setNotes(newNotes);
   };
 
-  const selectTag = tag => {
+  const selectTag = (tag) => {
     clearTempTags();
 
     if (filterTag === tag) {
@@ -213,22 +206,22 @@ export const useApp = () => {
     setFilterTag(tag);
   };
 
+  const selectNote = (index) => {
+    clearTempTags();
+    setCurrentNoteIndex(index);
+  }
+
   function selectFirstNote(notesList) {
     const noteIndices = _.keys(notesList);
     const firstNoteIndex = _.head(noteIndices);
     selectNote(firstNoteIndex);
   }
 
-  const selectNote = index => {
-    clearTempTags();
-    setCurrentNoteIndex(index);
-  }
-
   // create modal
 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const submitCreateModal = e => {
+  const submitCreateModal = (e) => {
     e.preventDefault();
 
     const noteName = _.trim(e.target.elements.noteName.value);
@@ -240,7 +233,7 @@ export const useApp = () => {
           tags: [],
           label: noteName,
           lines: [],
-        }
+        },
       };
       setNotes(newNotes);
       saveData(newNotes);
@@ -248,16 +241,16 @@ export const useApp = () => {
     }
   }
 
-  const cancelCreateModal = e => {
+  const cancelCreateModal = (e) => {
     e.preventDefault();
     setShowCreateModal(false);
   }
 
   // delete modal
-  
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const submitDeleteModal = e => {
+  const submitDeleteModal = (e) => {
     e.preventDefault();
 
     // can't delete last note
@@ -270,7 +263,7 @@ export const useApp = () => {
     setShowDeleteModal(false);
   }
 
-  const cancelDeleteModal = e => {
+  const cancelDeleteModal = (e) => {
     e.preventDefault();
     setShowDeleteModal(false)
   }
@@ -292,7 +285,7 @@ export const useApp = () => {
     {
       cancelCreateModal,
       cancelDeleteModal,
-      onEdit: e => editNote(e.target.value),
+      onEdit: (e) => editNote(e.target.value),
       openCreateModal: () => setShowCreateModal(true),
       openDeleteModal: () => setShowDeleteModal(true),
       selectNote,
@@ -302,3 +295,5 @@ export const useApp = () => {
     },
   ]
 };
+
+export default useApp;
