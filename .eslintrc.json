@@ -25,6 +25,7 @@
     "jsx-a11y/no-autofocus": "off",
     "react/jsx-filename-extension": "off",
     "valid-typeof": "warn",
+    "vars-on-top": "off",
     "quotes": [
       2,
       "single"

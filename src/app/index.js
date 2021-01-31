@@ -1,7 +1,6 @@
 import _ from 'lodash-es';
 import React from 'react';
-import './app.css';
-import useApp from './app-hook';
+import useApp from './logic';
 
 function App() {
   const [{

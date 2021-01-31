@@ -1,7 +1,7 @@
 import _ from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
-import * as helpers from './helpers';
+import * as helpers from '../helpers';
 
 const {
   isElectronModeEnabled,
