@@ -23,6 +23,7 @@
     "no-unused-vars": "warn",
     "constructor-super": "warn",
     "jsx-a11y/no-autofocus": "off",
+    "jsx-quotes": "off",
     "react/jsx-filename-extension": "off",
     "valid-typeof": "warn",
     "vars-on-top": "off",

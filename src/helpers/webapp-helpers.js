@@ -1,6 +1,8 @@
 import * as constants from '../constants';
 
-export const isWebappModeEnabled = constants.APP_MODE === constants.APP_MODES.webapp;
+export const isWebappModeEnabled = (
+  process.env.REACT_APP_TYPE === constants.APP_MODES.webApp
+);
 
 export const loadLocalStorageData = ({ callback, defaultData }) => {
   const parsedData = JSON.parse(window.localStorage.getItem('data') || defaultData);

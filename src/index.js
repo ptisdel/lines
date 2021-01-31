@@ -9,7 +9,7 @@ const { isChromeModeEnabled } = helpers.chromeExtension;
 ReactDOM.render(
   <React.StrictMode>
     { /* styles that only apply to chrome extension version */ }
-    { isChromeModeEnabled && <link rel="stylesheet" href="./chrome-extension-styles.css" />}
+    { isChromeModeEnabled && <link rel='stylesheet' href={`${process.env.PUBLIC_URL}/chrome-extension-styles.css`} />}
     <App />
   </React.StrictMode>,
   document.getElementById('root'),

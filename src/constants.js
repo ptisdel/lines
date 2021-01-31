@@ -1,7 +1,5 @@
 export const APP_MODES = {
-  chromeExtension: 'chrome-extension',
-  electronApp: 'electron-app',
-  webapp: 'webapp',
+  chromeExtension: 'chromeExtension',
+  electronApp: 'electron',
+  webApp: 'webApp',
 };
-
-export const APP_MODE = APP_MODES.webapp;

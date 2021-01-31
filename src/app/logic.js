@@ -76,7 +76,7 @@ const useApp = () => {
     loadData(callback);
 
     // subscribe to future data updates
-    if (isChromeModeEnabled) return listenToChromeStorageChanges();
+    if (isChromeModeEnabled) return listenToChromeStorageChanges({ callback, instanceId });
   }, []);
 
   // select first available note

@@ -1,3 +1,5 @@
 import * as constants from '../constants';
 
-export const isElectronModeEnabled = constants.APP_MODE === constants.APP_MODES.electronApp;
+export const isElectronModeEnabled = (
+  process.env.REACT_APP_TYPE === constants.APP_MODES.electronApp
+);
