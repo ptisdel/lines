@@ -124,9 +124,11 @@ const useApp = () => {
       setSaveCountdown(null)
       saveData(notes);
     }
-  }, _.isNull(saveCountdown) ? null : 1000);
+  }, _.isNull(saveCountdown) ? null : 150); // 0.15s intervals
 
-  const editNote = (text) => {
+  // editing a note starts a save countdown
+
+  const editNote = text => {
     const updatedLines = text?.split('\n');
 
     const updatedLineData = _.map(updatedLines, (line) => {
@@ -167,12 +169,8 @@ const useApp = () => {
       [currentNoteIndex]: updatedNote,
     };
     setNotes(newNotes);
-    setSaveCountdown(3);
+    setSaveCountdown(1);
   };
-
-  useEffect(() => () => {
-    if (!isLoading) saveData(notes);
-  }, [isLoading, notes]);
 
   // filter notes by tags
 
