@@ -13,7 +13,7 @@ if (APP_TYPE === 'webApp') {
 }
 if (APP_TYPE === 'electron') {
   console.log('Building app.');
-  execSync('react-scripts build',
+  execSync('react-scripts build && npm run make',
     { stdio: 'inherit' });
 }
 if (APP_TYPE === 'chromeExtension') {
