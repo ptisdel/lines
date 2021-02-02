@@ -3,6 +3,9 @@ const {
 } = require('electron');
 const isDev = require('electron-is-dev');
 const path = require('path');
+const isInstalling = require('electron-squirrel-startup');
+
+if (isInstalling) return app.quit();
 
 let mainWindow;
 let tray = null;
@@ -40,7 +43,7 @@ function createWindow() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Show App',
+      label: 'Open Lines',
       click() {
         mainWindow.show();
       },
